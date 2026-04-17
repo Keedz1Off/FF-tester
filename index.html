@@ -3,771 +3,154 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cyber FF Tester</title>
+<title>FF Tester FIXED</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --bg: #0b0613;
-  --bg2: #12091d;
-  --panel: #1a1028;
-  --panel2: #221235;
-  --border: #5b2d91;
-  --accent: #a855f7;
-  --accent2: #c084fc;
-  --accent3: #7e22ce;
-  --text: #f3e8ff;
-  --muted: #c4b5fd;
-  --soft: #2b1745;
-}
-
 body {
-  font-family: 'Press Start 2P', monospace;
-  background:
-    radial-gradient(circle at top, rgba(168,85,247,0.12), transparent 35%),
-    radial-gradient(circle at bottom right, rgba(192,132,252,0.08), transparent 30%),
-    var(--bg);
-  color: var(--text);
-  padding: 2rem;
-  overflow-x: hidden;
-}
-
-#bg {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-}
-
-.ff-header {
-  text-align: center;
-  margin-bottom: 25px;
-}
-
-.ff-icon {
-  width: 110px;
-  display: block;
-  margin: auto;
-  animation: float 3s ease-in-out infinite;
-  filter: drop-shadow(0 0 12px var(--accent));
-}
-
-.pixel-cone {
-  width: 56px;
-  height: 56px;
-  margin: 12px auto;
-  position: relative;
-  animation: spin 2.5s linear infinite, shake 0.12s infinite;
-  filter: drop-shadow(0 0 12px var(--accent));
-}
-.pixel-cone::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 0;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 18px solid transparent;
-  border-right: 18px solid transparent;
-  border-bottom: 42px solid var(--accent2);
-}
-.pixel-cone::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: 5px;
-  transform: translateX(-50%);
-  width: 34px;
-  height: 8px;
-  background: var(--accent3);
-  border: 2px solid #d8b4fe;
-}
-
-.glitch-title {
-  font-size: 16px;
-  color: var(--accent2);
-  text-align: center;
-  margin-top: 10px;
-  animation: shakeText 0.15s infinite, glow 2s infinite alternate;
+  font-family: monospace;
+  background: #0b0613;
+  color: white;
+  padding: 20px;
 }
 
 .card {
-  background: linear-gradient(180deg, rgba(34,18,53,0.92), rgba(19,10,31,0.96));
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  padding: 1.25rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 0 0 1px rgba(168,85,247,0.08), 0 0 24px rgba(126,34,206,0.18);
-}
-
-label {
-  font-size: 10px;
-  color: var(--muted);
-  display: block;
-  margin-bottom: 6px;
-}
-
-input, select {
-  width: 100%;
+  border: 1px solid #333;
   padding: 10px;
-  margin-bottom: 10px;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  color: var(--text);
-  border-radius: 8px;
-  outline: none;
-  font-family: inherit;
+  margin: 10px 0;
 }
 
-input:focus, select:focus {
-  border-color: var(--accent2);
-  box-shadow: 0 0 0 3px rgba(168,85,247,0.18);
-}
-
-.row {
-  display: flex;
-  gap: 12px;
-}
-
-.row .field {
-  flex: 1;
-}
-
-button {
-  width: 100%;
-  padding: 11px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  color: #140a21;
-  font-family: inherit;
-  transition: 0.18s ease;
-}
-
-button:hover {
-  box-shadow: 0 0 18px rgba(192,132,252,0.45);
-  transform: scale(1.03);
-}
-
-button.secondary {
-  background: linear-gradient(135deg, #5b21b6, #7e22ce);
-  color: #f5edff;
-}
-
-button.ghost {
-  background: #1a1028;
-  border: 1px solid var(--border);
-  color: var(--text);
+input, select, button {
+  padding: 8px;
+  margin: 5px;
 }
 
 .metrics {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 8px;
-  margin-bottom: 1rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
 }
 
 .metric {
-  background: rgba(17, 9, 28, 0.9);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  text-align: center;
-  padding: 1rem;
-  box-shadow: inset 0 0 18px rgba(168,85,247,0.06);
-}
-
-.metric-val {
-  font-size: 16px;
-  line-height: 1.4;
-  color: #f5d0fe;
-}
-
-.metric-lbl {
-  font-size: 10px;
-  color: #c084fc;
-}
-
-.code-box {
-  font-family: monospace;
-  font-size: 12px;
-  background: #10081a;
-  padding: 1rem;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  white-space: pre-wrap;
-  word-break: break-word;
-  color: #f3e8ff;
-}
-
-.chart-title {
-  font-size: 10px;
-  color: #d8b4fe;
-  margin-bottom: 12px;
-  text-align: center;
-}
-
-.presets {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.inline-note {
-  margin-top: 8px;
-  font-size: 9px;
-  color: #c084fc;
-  text-align: center;
-  line-height: 1.6;
-}
-
-.switch-row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.checkbox-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #130920;
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  border: 1px solid #333;
   padding: 10px;
-  min-height: 44px;
-}
-
-.checkbox-wrap input {
-  width: auto;
-  margin: 0;
-}
-
-.slider-note {
-  font-size: 9px;
-  color: #b794f4;
-  margin-top: -2px;
-  margin-bottom: 10px;
-}
-
-@keyframes spin { from { transform: rotate(0) } to { transform: rotate(360deg) } }
-@keyframes shake {
-  0% { transform: translate(0) }
-  50% { transform: translate(1px, -1px) }
-  100% { transform: translate(0) }
-}
-@keyframes float {
-  0%,100% { transform: translateY(0) }
-  50% { transform: translateY(-8px) }
-}
-@keyframes glow {
-  from { text-shadow: 0 0 5px var(--accent) }
-  to { text-shadow: 0 0 18px var(--accent2) }
-}
-@keyframes shakeText {
-  0% { transform: translate(0) }
-  25% { transform: translate(-1px, 1px) }
-  50% { transform: translate(1px, -1px) }
-  100% { transform: translate(0) }
-}
-
-@media (max-width: 1300px) {
-  .metrics {
-    grid-template-columns: repeat(4, 1fr);
-  }
-  .presets {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 800px) {
-  .row {
-    flex-direction: column;
-  }
-
-  .metrics {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .presets {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  body {
-    padding: 1rem;
-  }
+  text-align: center;
 }
 </style>
 </head>
 
 <body>
 
-<canvas id="bg"></canvas>
-
-<div class="ff-header">
-  <svg class="ff-icon" viewBox="0 0 100 100">
-    <rect x="30" y="20" width="40" height="40" fill="#a855f7"/>
-    <rect x="35" y="30" width="10" height="10" fill="#12091d"/>
-    <rect x="55" y="30" width="10" height="10" fill="#12091d"/>
-    <rect x="45" y="45" width="10" height="8" fill="#12091d"/>
-  </svg>
-
-  <div class="pixel-cone"></div>
-  <div class="glitch-title">FF</div>
-</div>
+<h2>FF TESTER FIX</h2>
 
 <div class="card">
-  <div class="presets">
-    <button class="ghost" onclick="applyPreset('light')">ЛЁГКОЕ</button>
-    <button class="ghost" onclick="applyPreset('medium')">СРЕДНЕЕ</button>
-    <button class="ghost" onclick="applyPreset('strong')">СИЛЬНОЕ</button>
-    <button class="ghost" onclick="applyPreset('extreme')">ОЧЕНЬ СИЛЬНОЕ</button>
-    <button class="secondary" onclick="applyAutoPreset()">АВТО</button>
-  </div>
-  <div class="inline-note">Пресеты уже привязаны к нормальным значениям. Авто — подбирает по CPU/RAM. Без шаманства.</div>
-</div>
+  <input id="host" placeholder="http://127.0.0.1:8000">
+  
+  <select id="path">
+    <option value="/">/</option>
+    <option value="/health">/health</option>
+    <option value="/test">/test</option>
+  </select>
 
-<div class="card">
-  <div class="row">
-    <div class="field">
-      <label>Адрес</label>
-      <input id="host" placeholder="http://127.0.0.1:8000">
-    </div>
-    <div class="field">
-      <label>Path</label>
-      <select id="path">
-        <option value="/">/</option>
-        <option value="/health">/health</option>
-        <option value="/healthz">/healthz</option>
-        <option value="/test-json?size=300">/test-json?size=300</option>
-        <option value="/test-json?size=1000">/test-json?size=1000</option>
-        <option value="/test-cpu?loops=120000">/test-cpu?loops=120000</option>
-        <option value="/test-cpu?loops=300000">/test-cpu?loops=300000</option>
-        <option value="/test-mixed?loops=70000&size=180">/test-mixed?loops=70000&size=180</option>
-        <option value="/test-mixed?loops=150000&size=500">/test-mixed?loops=150000&size=500</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Метод</label>
-      <select id="method">
-        <option value="GET" selected>GET</option>
-      </select>
-    </div>
-  </div>
+  <input id="users" type="number" value="50">
+  <input id="spawn" type="number" value="5">
+  <input id="dur" type="number" value="30">
 
-  <div class="row">
-    <div class="field">
-      <label>Users</label>
-      <input type="range" id="users" min="1" max="5000" value="50">
-      <div class="slider-note">До 5000</div>
-    </div>
-    <div class="field">
-      <label>Spawn</label>
-      <input type="range" id="spawn" min="1" max="500" value="5">
-      <div class="slider-note">До 500</div>
-    </div>
-    <div class="field">
-      <label>Time</label>
-      <input type="range" id="dur" min="5" max="3600" value="30">
-      <div class="slider-note">До 3600s</div>
-    </div>
-  </div>
-
-  <div class="row" style="margin-top:12px;">
-    <div class="field checkbox-wrap">
-      <input id="autoStopOn85" type="checkbox">
-      <label for="autoStopOn85" style="margin:0;">Автостоп при CPU > 85%</label>
-    </div>
-    <div class="field checkbox-wrap">
-      <input id="autoBoostVisual" type="checkbox" checked>
-      <label for="autoBoostVisual" style="margin:0;">Пульс UI при пике нагрузки</label>
-    </div>
-  </div>
-
-  <div class="row" style="margin-top:12px;">
-    <div class="field">
-      <button id="runBtn" onclick="generate()">RUN</button>
-    </div>
-    <div class="field">
-      <button id="stopBtn" class="secondary" onclick="stopRun()">STOP</button>
-    </div>
-  </div>
+  <button onclick="runTest()">RUN</button>
+  <button onclick="stopTest()">STOP</button>
 </div>
 
 <div class="metrics">
-  <div class="metric"><div id="u" class="metric-val">50</div><div class="metric-lbl">Users</div></div>
-  <div class="metric"><div id="s" class="metric-val">5</div><div class="metric-lbl">Spawn</div></div>
-  <div class="metric"><div id="t" class="metric-val">30s</div><div class="metric-lbl">Time</div></div>
-  <div class="metric"><div id="m" class="metric-val">GET</div><div class="metric-lbl">Method</div></div>
-  <div class="metric"><div id="cpuNow" class="metric-val">0%</div><div class="metric-lbl">CPU</div></div>
-  <div class="metric"><div id="ramNow" class="metric-val">0%</div><div class="metric-lbl">RAM</div></div>
-  <div class="metric"><div id="rpsNow" class="metric-val">0</div><div class="metric-lbl">RPS</div></div>
-  <div class="metric"><div id="presetNow" class="metric-val">manual</div><div class="metric-lbl">Preset</div></div>
+  <div class="metric">CPU <div id="cpu">0</div></div>
+  <div class="metric">RAM <div id="ram">0</div></div>
+  <div class="metric">RPS <div id="rps">0</div></div>
+  <div class="metric">USERS <div id="usersNow">0</div></div>
 </div>
 
-<div class="card">
-  <div class="chart-title">CPU LOAD</div>
-  <canvas id="cpuChart"></canvas>
-</div>
+<canvas id="cpuChart"></canvas>
+<canvas id="rpsChart"></canvas>
 
-<div class="card">
-  <div class="chart-title">RPS</div>
-  <canvas id="rpsChart"></canvas>
-</div>
-
-<div class="card">
-  <div class="chart-title">LOG</div>
-  <div id="code" class="code-box">Готов к запуску.</div>
-</div>
-
-<audio id="boom">
-  <source src="https://www.soundjay.com/buttons/sounds/button-16.mp3">
-</audio>
+<pre id="log">ready</pre>
 
 <script>
-const API_BASE = "http://127.0.0.1:5000";
+const API = "http://127.0.0.1:5000";
 
-let cpuChart;
-let rpsChart;
-let cpuData = [];
-let rpsData = [];
-let pollTimer = null;
-let currentPreset = "manual";
+let cpuChart, rpsChart;
+let timer = null;
 
-const canvas = document.getElementById("bg");
-const ctx = canvas.getContext("2d");
+function log(t){ document.getElementById("log").textContent = t; }
 
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
+function initCharts(){
+  cpuChart = new Chart(document.getElementById("cpuChart"), {
+    type:"line",
+    data:{labels:[],datasets:[{data:[]}]}
+  });
 
-let particles = [];
-for (let i = 0; i < 80; i++) {
-  particles.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    r: Math.random() * 2 + 1,
-    dx: (Math.random() - 0.5),
-    dy: (Math.random() - 0.5)
+  rpsChart = new Chart(document.getElementById("rpsChart"), {
+    type:"line",
+    data:{labels:[],datasets:[{data:[]}]}
   });
 }
 
-function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#a855f7";
-
-  particles.forEach(p => {
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    ctx.fill();
-
-    p.x += p.dx;
-    p.y += p.dy;
-
-    if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-    if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
-  });
-
-  requestAnimationFrame(draw);
-}
-draw();
-
-function makeLineChart(canvasId, label, maxY, percentMode = false) {
-  return new Chart(document.getElementById(canvasId), {
-    type: "line",
-    data: {
-      labels: [],
-      datasets: [{
-        label,
-        data: [],
-        borderColor: "#a855f7",
-        backgroundColor: "rgba(168,85,247,0.18)",
-        borderWidth: 3,
-        tension: 0.35,
-        fill: true,
-        pointRadius: 0,
-        pointHoverRadius: 4
-      }]
-    },
-    options: {
-      responsive: true,
-      animation: false,
-      maintainAspectRatio: true,
-      plugins: {
-        legend: {
-          display: true,
-          labels: {
-            color: "#ddd6fe",
-            font: { size: 10 }
-          }
-        },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              const value = context.parsed.y;
-              return percentMode ? ` ${label}: ${value}%` : ` ${label}: ${value}`;
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          ticks: { color: "#c4b5fd" },
-          grid: { color: "#2b1745" }
-        },
-        y: {
-          min: 0,
-          max: maxY,
-          ticks: {
-            color: "#c4b5fd",
-            stepSize: percentMode ? 10 : undefined,
-            callback: function(value) {
-              return percentMode ? value + "%" : value;
-            }
-          },
-          grid: { color: "#2b1745" }
-        }
-      }
-    }
-  });
-}
-
-function initCharts() {
-  cpuChart = makeLineChart("cpuChart", "CPU Load", 100, true);
-  rpsChart = makeLineChart("rpsChart", "RPS", 500, false);
-}
-
-function resetCharts() {
-  cpuData = [];
-  rpsData = [];
-
-  cpuChart.data.labels = [];
-  cpuChart.data.datasets[0].data = [];
-  cpuChart.update();
-
-  rpsChart.data.labels = [];
-  rpsChart.data.datasets[0].data = [];
-  rpsChart.update();
-}
-
-function pushCpuPoint(value) {
-  const safeValue = Math.max(0, Math.min(100, Number(value) || 0));
-  cpuData.push(safeValue);
-  if (cpuData.length > 60) cpuData.shift();
-
-  cpuChart.data.labels = cpuData.map((_, i) => `${i + 1}`);
-  cpuChart.data.datasets[0].data = cpuData;
-  cpuChart.update();
-}
-
-function pushRpsPoint(value) {
-  const safeValue = Math.max(0, Number(value) || 0);
-  rpsData.push(safeValue);
-  if (rpsData.length > 60) rpsData.shift();
-
-  const maxRps = Math.max(50, ...rpsData, 10);
-  rpsChart.options.scales.y.max = Math.ceil(maxRps * 1.2);
-
-  rpsChart.data.labels = rpsData.map((_, i) => `${i + 1}`);
-  rpsChart.data.datasets[0].data = rpsData;
-  rpsChart.update();
-}
-
-function syncSliderLabels() {
-  document.getElementById("u").textContent = document.getElementById("users").value;
-  document.getElementById("s").textContent = document.getElementById("spawn").value;
-  document.getElementById("t").textContent = document.getElementById("dur").value + "s";
-  document.getElementById("m").textContent = document.getElementById("method").value;
-  document.getElementById("presetNow").textContent = currentPreset;
-}
-
-["users", "spawn", "dur", "method"].forEach(id => {
-  document.getElementById(id).addEventListener("input", syncSliderLabels);
-  document.getElementById(id).addEventListener("change", syncSliderLabels);
-});
-
-function setPresetValues(p) {
-  document.getElementById("users").value = p.users;
-  document.getElementById("spawn").value = p.spawn;
-  document.getElementById("dur").value = p.dur;
-  syncSliderLabels();
-}
-
-function applyPreset(name) {
-  currentPreset = name;
-
-  const presets = {
-    light:   { users: 25,   spawn: 2,   dur: 20 },
-    medium:  { users: 100,  spawn: 8,   dur: 40 },
-    strong:  { users: 500,  spawn: 25,  dur: 60 },
-    extreme: { users: 2000, spawn: 100, dur: 120 }
-  };
-
-  const p = presets[name];
-  if (!p) return;
-
-  setPresetValues(p);
-  log(`Preset applied: ${name}`);
-}
-
-async function applyAutoPreset() {
-  try {
-    const response = await fetch(`${API_BASE}/auto-config`);
-    const data = await response.json();
-
-    if (!response.ok) {
-      log("ERROR auto-config: " + (data.error || "Не удалось получить автонастройку"));
-      return;
-    }
-
-    currentPreset = data.preset_name || "auto";
-    setPresetValues({
-      users: data.users,
-      spawn: data.spawn,
-      dur: data.time
-    });
-
-    log("Автонастройка применена:\n" + JSON.stringify(data, null, 2));
-  } catch (err) {
-    log("ERROR auto-config: " + err.message);
-  }
-}
-
-function log(text) {
-  document.getElementById("code").textContent = text;
-}
-
-syncSliderLabels();
 initCharts();
 
-async function generate() {
-  const host = document.getElementById("host").value.trim();
-  const path = document.getElementById("path").value;
-  const users = Number(document.getElementById("users").value);
-  const spawn = Number(document.getElementById("spawn").value);
-  const time = Number(document.getElementById("dur").value);
-  const method = document.getElementById("method").value;
+function push(chart,val){
+  chart.data.labels.push("");
+  chart.data.datasets[0].data.push(val);
 
-  if (!host) {
-    log("ERROR: укажи host");
-    return;
+  if(chart.data.labels.length>60){
+    chart.data.labels.shift();
+    chart.data.datasets[0].data.shift();
   }
 
-  clearPolling();
-  resetCharts();
-
-  try {
-    const response = await fetch(`${API_BASE}/run`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        host,
-        path,
-        users,
-        spawn,
-        time,
-        method,
-        preset_name: currentPreset,
-        auto_stop_on_cpu: document.getElementById("autoStopOn85").checked,
-        cpu_stop_threshold: 85
-      })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      log("ERROR: " + (data.error || "Не удалось запустить"));
-      return;
-    }
-
-    log((data.cmd || "Запущено") + "\n\n" + JSON.stringify(data.config || {}, null, 2));
-    document.getElementById("boom").play().catch(() => {});
-    startPolling();
-  } catch (err) {
-    log("ERROR: " + err.message);
-  }
+  chart.update();
 }
 
-async function stopRun() {
-  clearPolling();
+async function runTest(){
+  const body = {
+    host: document.getElementById("host").value,
+    path: document.getElementById("path").value,
+    users: Number(document.getElementById("users").value),
+    spawn: Number(document.getElementById("spawn").value),
+    time: Number(document.getElementById("dur").value),
+    preset_name: "manual"
+  };
 
-  try {
-    const response = await fetch(`${API_BASE}/stop`, {
-      method: "POST"
-    });
+  const res = await fetch(API + "/run", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify(body)
+  });
 
-    const data = await response.json();
-    log(data.status === "stopped" ? "Тест остановлен." : "Нечего останавливать.");
-  } catch (err) {
-    log("ERROR: " + err.message);
-  }
+  const data = await res.json();
+  log(JSON.stringify(data,null,2));
+
+  start();
 }
 
-function startPolling() {
-  pollStats();
-  pollTimer = setInterval(pollStats, 1000);
+async function stopTest(){
+  await fetch(API + "/stop", {method:"POST"});
+  clearInterval(timer);
+  log("stopped");
 }
 
-function clearPolling() {
-  if (pollTimer) {
-    clearInterval(pollTimer);
-    pollTimer = null;
-  }
+function start(){
+  timer = setInterval(update, 1000);
 }
 
-async function pollStats() {
-  try {
-    const response = await fetch(`${API_BASE}/stats`);
-    const data = await response.json();
+async function update(){
+  const res = await fetch(API + "/stats");
+  const d = await res.json();
 
-    if (!response.ok) {
-      log("ERROR: " + (data.error || "Ошибка stats"));
-      clearPolling();
-      return;
-    }
+  // ✅ ВАЖНО: СОВПАДАЕТ С FLASK
+  document.getElementById("cpu").textContent = d.cpu ?? 0;
+  document.getElementById("ram").textContent = d.ram ?? 0;
+  document.getElementById("rps").textContent = d.rps ?? 0;
+  document.getElementById("usersNow").textContent = d.users ?? 0;
 
-    document.getElementById("u").textContent = data.users ?? 0;
-    document.getElementById("s").textContent = data.spawn_rate ?? 0;
-    document.getElementById("t").textContent = (data.run_time_seconds ?? 0) + "s";
-    document.getElementById("m").textContent = data.method || "GET";
-    document.getElementById("presetNow").textContent = data.preset_name || currentPreset;
-
-    const cpu = Number(data.cpu_percent ?? 0);
-    const ram = Number(data.memory_percent ?? 0);
-    const rps = Number(data.rps ?? 0);
-
-    document.getElementById("cpuNow").textContent = cpu.toFixed(1) + "%";
-    document.getElementById("ramNow").textContent = ram.toFixed(1) + "%";
-    document.getElementById("rpsNow").textContent = rps.toFixed(1);
-
-    pushCpuPoint(cpu);
-    pushRpsPoint(rps);
-
-    if (document.getElementById("autoBoostVisual").checked && cpu > 85) {
-      document.body.style.filter = "contrast(1.08) brightness(1.04) saturate(1.05)";
-      setTimeout(() => {
-        document.body.style.filter = "";
-      }, 180);
-    }
-
-    if (data.status === "stopped") {
-      clearPolling();
-      if (data.stop_reason) {
-        log("Тест остановлен.\nПричина: " + data.stop_reason);
-      }
-    }
-  } catch (err) {
-    log("ERROR: " + err.message);
-    clearPolling();
-  }
+  push(cpuChart, d.cpu ?? 0);
+  push(rpsChart, d.rps ?? 0);
 }
 </script>
 
