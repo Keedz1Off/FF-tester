@@ -360,7 +360,3 @@ def test_mixed():
 @server.route("/healthz")
 def healthz():
     return jsonify({"status": "ok"})
-
-
-if __name__ == "__main__":
-    server.run(port=5000, debug=True)
