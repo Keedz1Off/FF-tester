@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import subprocess
 import os
@@ -8,14 +8,11 @@ import csv
 import threading
 
 # =========================
-# INIT FLASK APP (ВАЖНО)
+# INIT
 # =========================
 server = Flask(__name__)
 CORS(server)
 
-# =========================
-# GLOBAL STATE
-# =========================
 process = None
 started_at = None
 last_host = None
@@ -38,6 +35,23 @@ def is_running():
     return process is not None and process.poll() is None
 
 
+def stop_process(reason="manual"):
+    global process, last_stop_reason
+
+    if is_running():
+        try:
+            process.terminate()
+            process.wait(timeout=5)
+        except:
+            try:
+                process.kill()
+            except:
+                pass
+
+    process = None
+    last_stop_reason = reason
+
+
 def read_last_rps(csv_path="locust_results_stats_history.csv"):
     if not os.path.exists(csv_path):
         return 0
@@ -56,9 +70,8 @@ def read_last_rps(csv_path="locust_results_stats_history.csv"):
                         return round(float(last[key]), 2)
                     except:
                         pass
-
     except:
-        return 0
+        pass
 
     return 0
 
@@ -78,23 +91,6 @@ def cleanup_old_csv():
                 pass
 
 
-def stop_process(reason="manual"):
-    global process, last_stop_reason
-
-    if is_running():
-        try:
-            process.terminate()
-            process.wait(timeout=5)
-        except:
-            try:
-                process.kill()
-            except:
-                pass
-
-    process = None
-    last_stop_reason = reason
-
-
 def monitor_cpu():
     global auto_stop_enabled, auto_stop_cpu_threshold
 
@@ -102,27 +98,22 @@ def monitor_cpu():
         if auto_stop_enabled:
             cpu = psutil.cpu_percent(interval=1.0)
             if cpu >= auto_stop_cpu_threshold:
-                stop_process(reason=f"CPU limit {cpu}%")
+                stop_process(f"CPU limit {cpu}%")
                 break
         else:
             time.sleep(1)
 
 
-def build_auto_config():
-    cpu_count = psutil.cpu_count(logical=True) or 4
-    ram_gb = round(psutil.virtual_memory().total / (1024 ** 3), 1)
-
-    if cpu_count <= 4 or ram_gb <= 8:
-        return {"preset": "light", "users": 50, "spawn": 4, "time": 30}
-
-    if cpu_count <= 8 or ram_gb <= 16:
-        return {"preset": "medium", "users": 300, "spawn": 20, "time": 60}
-
-    return {"preset": "strong", "users": 1000, "spawn": 50, "time": 120}
+# =========================
+# FRONTEND (ВАЖНО)
+# =========================
+@server.route("/")
+def index():
+    return send_from_directory(".", "index.html")
 
 
 # =========================
-# ROUTES
+# API
 # =========================
 @server.route("/health")
 def health():
@@ -131,7 +122,13 @@ def health():
 
 @server.route("/auto-config")
 def auto_config():
-    return jsonify(build_auto_config())
+    cpu_count = psutil.cpu_count(logical=True) or 4
+    ram_gb = round(psutil.virtual_memory().total / (1024 ** 3), 1)
+
+    return jsonify({
+        "cpu": cpu_count,
+        "ram": ram_gb
+    })
 
 
 @server.route("/run", methods=["POST"])
@@ -140,7 +137,6 @@ def run():
     global last_host, last_users, last_spawn
     global last_method, last_preset_name
     global auto_stop_enabled, auto_stop_cpu_threshold
-    global monitor_thread
 
     data = request.json or {}
 
@@ -163,13 +159,6 @@ def run():
 
     cleanup_old_csv()
 
-    wait_min, wait_max = 0.2, 1.0
-
-    if preset_name == "light":
-        wait_min, wait_max = 0.5, 1.5
-    elif preset_name == "strong":
-        wait_min, wait_max = 0.05, 0.3
-
     cmd = [
         "locust",
         "-f", "locustfile.py",
@@ -183,8 +172,6 @@ def run():
 
     env = os.environ.copy()
     env["TARGET_PATH"] = path
-    env["WAIT_MIN"] = str(wait_min)
-    env["WAIT_MAX"] = str(wait_max)
 
     process = subprocess.Popen(cmd, env=env)
 
@@ -195,10 +182,9 @@ def run():
     last_method = method
     last_preset_name = preset_name
 
-    monitor_thread = threading.Thread(target=monitor_cpu, daemon=True)
-    monitor_thread.start()
+    threading.Thread(target=monitor_cpu, daemon=True).start()
 
-    return jsonify({"status": "started", "cmd": " ".join(cmd)})
+    return jsonify({"status": "started"})
 
 
 @server.route("/stop", methods=["POST"])
@@ -231,7 +217,7 @@ def test():
 
 
 # =========================
-# START SERVER
+# START
 # =========================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
