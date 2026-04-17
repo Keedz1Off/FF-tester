@@ -3,154 +3,273 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FF Tester FIXED</title>
+<title>Cyber FF Tester</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0b0613;
+  --bg2: #12091d;
+  --panel: #1a1028;
+  --panel2: #221235;
+  --border: #5b2d91;
+  --accent: #a855f7;
+  --accent2: #c084fc;
+  --accent3: #7e22ce;
+  --text: #f3e8ff;
+  --muted: #c4b5fd;
+  --soft: #2b1745;
+}
+
 body {
-  font-family: monospace;
-  background: #0b0613;
-  color: white;
-  padding: 20px;
+  font-family: 'Press Start 2P', monospace;
+  background:
+    radial-gradient(circle at top, rgba(168,85,247,0.12), transparent 35%),
+    radial-gradient(circle at bottom right, rgba(192,132,252,0.08), transparent 30%),
+    var(--bg);
+  color: var(--text);
+  padding: 2rem;
+  overflow-x: hidden;
+}
+
+#bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
+
+.ff-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.ff-icon {
+  width: 110px;
+  display: block;
+  margin: auto;
+  animation: float 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 12px var(--accent));
+}
+
+.pixel-cone {
+  width: 56px;
+  height: 56px;
+  margin: 12px auto;
+  position: relative;
+  animation: spin 2.5s linear infinite, shake 0.12s infinite;
+  filter: drop-shadow(0 0 12px var(--accent));
+}
+.pixel-cone::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-bottom: 42px solid var(--accent2);
+}
+.pixel-cone::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  transform: translateX(-50%);
+  width: 34px;
+  height: 8px;
+  background: var(--accent3);
+  border: 2px solid #d8b4fe;
+}
+
+.glitch-title {
+  font-size: 16px;
+  color: var(--accent2);
+  text-align: center;
+  margin-top: 10px;
+  animation: shakeText 0.15s infinite, glow 2s infinite alternate;
 }
 
 .card {
-  border: 1px solid #333;
-  padding: 10px;
-  margin: 10px 0;
+  background: linear-gradient(180deg, rgba(34,18,53,0.92), rgba(19,10,31,0.96));
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 0 0 1px rgba(168,85,247,0.08), 0 0 24px rgba(126,34,206,0.18);
 }
 
-input, select, button {
-  padding: 8px;
-  margin: 5px;
+label {
+  font-size: 10px;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 6px;
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  outline: none;
+  font-family: inherit;
+}
+
+.row { display: flex; gap: 12px; }
+
+button {
+  width: 100%;
+  padding: 11px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #140a21;
 }
 
 .metrics {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 8px;
+  margin-bottom: 1rem;
 }
 
 .metric {
-  border: 1px solid #333;
-  padding: 10px;
+  background: rgba(17, 9, 28, 0.9);
+  border: 1px solid var(--border);
+  border-radius: 10px;
   text-align: center;
+  padding: 1rem;
 }
+
+.metric-val { color: #f5d0fe; }
+.metric-lbl { font-size: 10px; color: #c084fc; }
+
+.code-box {
+  font-family: monospace;
+  font-size: 12px;
+  background: #10081a;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  color: #f3e8ff;
+}
+
+@keyframes spin { from { transform: rotate(0) } to { transform: rotate(360deg) } }
+@keyframes shake { 50% { transform: translate(1px,-1px) } }
+@keyframes float { 50% { transform: translateY(-8px) } }
+@keyframes glow { from { text-shadow:0 0 5px var(--accent) } to { text-shadow:0 0 18px var(--accent2) } }
+@keyframes shakeText { 50% { transform: translate(1px,-1px) } }
 </style>
 </head>
 
 <body>
 
-<h2>FF TESTER FIX</h2>
+<div class="ff-header">
+  <div class="glitch-title">FF TESTER</div>
+</div>
 
 <div class="card">
   <input id="host" placeholder="http://127.0.0.1:8000">
-  
-  <select id="path">
-    <option value="/">/</option>
-    <option value="/health">/health</option>
-    <option value="/test">/test</option>
-  </select>
+  <input id="path" value="/">
 
-  <input id="users" type="number" value="50">
-  <input id="spawn" type="number" value="5">
-  <input id="dur" type="number" value="30">
+  <div class="row">
+    <input id="users" type="number" value="50">
+    <input id="spawn" type="number" value="5">
+    <input id="dur" type="number" value="30">
+  </div>
 
-  <button onclick="runTest()">RUN</button>
-  <button onclick="stopTest()">STOP</button>
+  <button onclick="run()">RUN</button>
+  <button onclick="stop()">STOP</button>
 </div>
 
 <div class="metrics">
   <div class="metric">CPU <div id="cpu">0</div></div>
   <div class="metric">RAM <div id="ram">0</div></div>
   <div class="metric">RPS <div id="rps">0</div></div>
-  <div class="metric">USERS <div id="usersNow">0</div></div>
+  <div class="metric">USERS <div id="u">0</div></div>
 </div>
 
 <canvas id="cpuChart"></canvas>
 <canvas id="rpsChart"></canvas>
 
-<pre id="log">ready</pre>
+<div class="card">
+  <div id="log" class="code-box">READY</div>
+</div>
 
 <script>
 const API = "http://127.0.0.1:5000";
 
 let cpuChart, rpsChart;
-let timer = null;
+let timer;
 
 function log(t){ document.getElementById("log").textContent = t; }
 
-function initCharts(){
-  cpuChart = new Chart(document.getElementById("cpuChart"), {
-    type:"line",
-    data:{labels:[],datasets:[{data:[]}]}
-  });
-
-  rpsChart = new Chart(document.getElementById("rpsChart"), {
+function chart(id){
+  return new Chart(document.getElementById(id), {
     type:"line",
     data:{labels:[],datasets:[{data:[]}]}
   });
 }
 
-initCharts();
+cpuChart = chart("cpuChart");
+rpsChart = chart("rpsChart");
 
-function push(chart,val){
-  chart.data.labels.push("");
-  chart.data.datasets[0].data.push(val);
-
-  if(chart.data.labels.length>60){
-    chart.data.labels.shift();
-    chart.data.datasets[0].data.shift();
+function push(c,v){
+  c.data.labels.push("");
+  c.data.datasets[0].data.push(v);
+  if(c.data.labels.length>60){
+    c.data.labels.shift();
+    c.data.datasets[0].data.shift();
   }
-
-  chart.update();
+  c.update();
 }
 
-async function runTest(){
+async function run(){
   const body = {
-    host: document.getElementById("host").value,
-    path: document.getElementById("path").value,
-    users: Number(document.getElementById("users").value),
-    spawn: Number(document.getElementById("spawn").value),
-    time: Number(document.getElementById("dur").value),
+    host: host.value,
+    path: path.value,
+    users: +users.value,
+    spawn: +spawn.value,
+    time: +dur.value,
     preset_name: "manual"
   };
 
-  const res = await fetch(API + "/run", {
+  const r = await fetch(API+"/run",{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body: JSON.stringify(body)
   });
 
-  const data = await res.json();
-  log(JSON.stringify(data,null,2));
-
-  start();
+  log(JSON.stringify(await r.json(),null,2));
+  timer = setInterval(poll,1000);
 }
 
-async function stopTest(){
-  await fetch(API + "/stop", {method:"POST"});
+async function stop(){
+  await fetch(API+"/stop",{method:"POST"});
   clearInterval(timer);
-  log("stopped");
+  log("STOPPED");
 }
 
-function start(){
-  timer = setInterval(update, 1000);
-}
+async function poll(){
+  const r = await fetch(API+"/stats");
+  const d = await r.json();
 
-async function update(){
-  const res = await fetch(API + "/stats");
-  const d = await res.json();
+  cpu.textContent = d.cpu ?? 0;
+  ram.textContent = d.ram ?? 0;
+  rps.textContent = d.rps ?? 0;
+  u.textContent = d.users ?? 0;
 
-  // ✅ ВАЖНО: СОВПАДАЕТ С FLASK
-  document.getElementById("cpu").textContent = d.cpu ?? 0;
-  document.getElementById("ram").textContent = d.ram ?? 0;
-  document.getElementById("rps").textContent = d.rps ?? 0;
-  document.getElementById("usersNow").textContent = d.users ?? 0;
-
-  push(cpuChart, d.cpu ?? 0);
-  push(rpsChart, d.rps ?? 0);
+  push(cpuChart,d.cpu);
+  push(rpsChart,d.rps);
 }
 </script>
 
